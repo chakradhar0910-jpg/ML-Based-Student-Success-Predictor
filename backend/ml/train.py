@@ -6,6 +6,9 @@ from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import RandomForestRegressor
 from xgboost import XGBRegressor
 
+import sys
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
 from preprocess import get_preprocessor
 from evaluate import evaluate_model
 
