@@ -12,8 +12,8 @@ def predict():
         if not data:
             return jsonify({'success': False, 'message': 'No data provided'}), 400
             
-        # Call ML Service
-        cgpa = ml_service_instance.predict_cgpa(data)
+        # Call ML Service with confidence interval
+        cgpa, confidence_interval = ml_service_instance.predict_cgpa(data, return_confidence=True)
         performance, grade = ml_service_instance.classify_performance(cgpa)
         risk = ml_service_instance.calculate_risk(cgpa)
         recommendations = ml_service_instance.generate_recommendations(data, cgpa)
@@ -24,14 +24,17 @@ def predict():
             try:
                 with connection.cursor() as cursor:
                     sql = """
-                    INSERT INTO predictions (student_id, predicted_cgpa, risk_level, recommendations)
-                    VALUES (%s, %s, %s, %s)
+                    INSERT INTO predictions (student_id, predicted_cgpa, grade, performance_category, risk_level, recommendations, model_name)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s)
                     """
                     cursor.execute(sql, (
                         data['student_id'],
                         cgpa,
+                        grade,
+                        performance,
                         risk,
-                        json.dumps(recommendations)
+                        json.dumps(recommendations),
+                        'Random Forest'
                     ))
                     connection.commit()
             except Exception as db_e:
@@ -41,6 +44,7 @@ def predict():
         
         result = {
             'predicted_cgpa': cgpa,
+            'confidence_interval': confidence_interval,
             'grade': grade,
             'performance_category': performance,
             'risk_level': risk,
@@ -85,12 +89,13 @@ def predict_bulk():
             data_dict = row.to_dict()
             
             try:
-                cgpa = ml_service_instance.predict_cgpa(data_dict)
+                cgpa, confidence_interval = ml_service_instance.predict_cgpa(data_dict, return_confidence=True)
                 performance, grade = ml_service_instance.classify_performance(cgpa)
                 risk = ml_service_instance.calculate_risk(cgpa)
                 
                 # Append to original data
                 data_dict['Predicted_CGPA'] = cgpa
+                data_dict['Confidence_Interval'] = confidence_interval['range_text']
                 data_dict['Grade'] = grade
                 data_dict['Performance'] = performance
                 data_dict['Risk_Level'] = risk
@@ -103,14 +108,17 @@ def predict_bulk():
                         connection = get_db_connection()
                         with connection.cursor() as cursor:
                             sql = """
-                            INSERT INTO predictions (student_id, predicted_cgpa, risk_level, recommendations)
-                            VALUES (%s, %s, %s, %s)
+                            INSERT INTO predictions (student_id, predicted_cgpa, grade, performance_category, risk_level, recommendations, model_name)
+                            VALUES (%s, %s, %s, %s, %s, %s, %s)
                             """
                             cursor.execute(sql, (
                                 data_dict['student_id'],
                                 cgpa,
+                                grade,
+                                performance,
                                 risk,
-                                json.dumps(recommendations)
+                                json.dumps(recommendations),
+                                'Random Forest'
                             ))
                             connection.commit()
                         connection.close()
