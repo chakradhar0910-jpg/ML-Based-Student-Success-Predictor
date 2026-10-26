@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS students (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
--- Predictions Table (For Phase 4/5)
+-- Predictions Table
 CREATE TABLE IF NOT EXISTS predictions (
     id INT AUTO_INCREMENT PRIMARY KEY,
     student_id VARCHAR(50) NOT NULL,
@@ -40,7 +40,8 @@ CREATE TABLE IF NOT EXISTS predictions (
     grade VARCHAR(5),
     performance_category VARCHAR(20),
     risk_level VARCHAR(20),
+    recommendations TEXT,
     model_name VARCHAR(50),
-    prediction_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (student_id) REFERENCES students(student_id) ON DELETE CASCADE
 );
