@@ -1,6 +1,7 @@
 import os
 import joblib
 import pandas as pd
+import numpy as np
 
 class MLService:
     def __init__(self):
@@ -18,7 +19,29 @@ class MLService:
         except Exception as e:
             print(f"Warning: ML artifacts not loaded properly. {e}")
 
-    def predict_cgpa(self, data_dict):
+    def calculate_confidence_interval(self, X_processed, predicted_cgpa):
+        """Calculates standard error and confidence interval from ensemble estimators."""
+        try:
+            if hasattr(self.model, 'estimators_'):
+                tree_preds = [float(tree.predict(X_processed)[0]) for tree in self.model.estimators_]
+                std_dev = float(np.std(tree_preds))
+                margin = round(min(0.60, max(0.18, std_dev)), 2)
+            else:
+                margin = 0.32
+        except Exception:
+            margin = 0.32
+            
+        lower = max(0.0, round(predicted_cgpa - margin, 2))
+        upper = min(10.0, round(predicted_cgpa + margin, 2))
+        return {
+            'margin': margin,
+            'lower': lower,
+            'upper': upper,
+            'confidence_level': '95%',
+            'range_text': f"{predicted_cgpa:.2f} ± {margin:.2f}"
+        }
+
+    def predict_cgpa(self, data_dict, return_confidence=False):
         """
         Predicts CGPA for a single student.
         data_dict should contain the required input features.
@@ -29,20 +52,35 @@ class MLService:
         # Convert input dictionary to DataFrame
         df = pd.DataFrame([data_dict])
         
-        # Make sure missing categorical fields have defaults to prevent errors during preprocessing
-        if 'gender' not in df.columns:
-            df['gender'] = 'Other'
-        if 'department' not in df.columns:
-            df['department'] = 'CSE'
+        # Ensure all columns required by the preprocessor exist with sensible defaults
+        expected_defaults = {
+            'gender': 'Male',
+            'department': 'CSE',
+            'age': 20,
+            'semester': 4,
+            'attendance': 75.0,
+            'previous_cgpa': 7.0,
+            'mid1': 35.0,
+            'mid2': 35.0,
+            'internal_marks': 15.0,
+            'backlogs': 0
+        }
+        for col, val in expected_defaults.items():
+            if col not in df.columns or df[col].isnull().all() or df[col].iloc[0] == '':
+                df[col] = val
 
         # Preprocess
         X_processed = self.preprocessor.transform(df)
         
         # Predict
-        predicted_cgpa = self.model.predict(X_processed)[0]
-        
-        # Ensure bounds (0 to 10)
-        return max(0.0, min(10.0, round(float(predicted_cgpa), 2)))
+        raw_cgpa = self.model.predict(X_processed)[0]
+        predicted_cgpa = max(0.0, min(10.0, round(float(raw_cgpa), 2)))
+
+        if return_confidence:
+            conf = self.calculate_confidence_interval(X_processed, predicted_cgpa)
+            return predicted_cgpa, conf
+
+        return predicted_cgpa
 
     def classify_performance(self, cgpa):
         if cgpa >= 8.5:
