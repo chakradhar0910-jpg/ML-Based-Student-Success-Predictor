@@ -6,7 +6,6 @@ import PublicLayout from './layouts/PublicLayout.jsx'
 import DashboardLayout from './layouts/DashboardLayout.jsx'
 
 // Public pages
-import LandingPage from './pages/LandingPage.jsx'
 import LoginPage from './pages/LoginPage.jsx'
 
 // Dashboard
@@ -35,7 +34,7 @@ function App() {
       <Routes>
         {/* ── Public Routes ── */}
         <Route element={<PublicLayout />}>
-          <Route path="/" element={<LandingPage />} />
+          <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="/login" element={<LoginPage />} />
         </Route>
 
@@ -62,7 +61,7 @@ function App() {
         </Route>
 
         {/* ── Catch-all ── */}
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </Router>
   )
