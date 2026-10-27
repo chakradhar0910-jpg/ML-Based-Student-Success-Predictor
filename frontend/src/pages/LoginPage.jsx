@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react'
-import { Link, useNavigate, useLocation } from 'react-router-dom'
-import { GraduationCap, Eye, EyeOff, AlertCircle, Loader2, ArrowLeft } from 'lucide-react'
+import { useNavigate, useLocation } from 'react-router-dom'
+import { GraduationCap, Eye, EyeOff, AlertCircle, Loader2 } from 'lucide-react'
 import { isAuthenticated, setAuthData } from '../utils/auth.js'
+import api from '../services/api.js'
 
 /**
  * LoginPage
@@ -77,7 +78,6 @@ function LoginPage() {
     setLoading(true)
 
     try {
-      const { default: api } = await import('../services/api.js')
       const res = await api.post('/auth/login', { email: form.email, password: form.password })
       if (res.success) {
         setAuthData(res.data.token, res.data.user)
@@ -111,18 +111,6 @@ function LoginPage() {
                     flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-md">
 
-        {/* Back to home */}
-        <div className="mb-6">
-          <Link
-            to="/"
-            className="inline-flex items-center gap-1.5 text-sm text-surface-500
-                       hover:text-surface-700 transition-colors"
-          >
-            <ArrowLeft size={14} />
-            Back to home
-          </Link>
-        </div>
-
         {/* Card */}
         <div className="card shadow-card-lg">
           {/* Header */}
@@ -131,9 +119,9 @@ function LoginPage() {
                             rounded-2xl bg-primary-600 shadow-lg mb-4">
               <GraduationCap size={28} className="text-white" />
             </div>
-            <h1 className="text-2xl font-bold text-surface-900">Welcome back</h1>
+            <h1 className="text-2xl font-bold text-surface-900">Student Success Predictor</h1>
             <p className="text-surface-500 text-sm mt-1">
-              Sign in to the Student Success Predictor
+              Sign in with your academic credentials
             </p>
           </div>
 
@@ -241,10 +229,10 @@ function LoginPage() {
             </button>
           </form>
 
-          {/* Dev helper — remove in Phase 3 */}
+          {/* Demo account selector */}
           <div className="mt-6 p-4 rounded-xl bg-surface-50 border border-surface-200">
             <p className="text-xs font-semibold text-surface-500 mb-2 uppercase tracking-wide">
-              Quick fill (dev only)
+              Demo Accounts
             </p>
             <div className="flex gap-2">
               <button
