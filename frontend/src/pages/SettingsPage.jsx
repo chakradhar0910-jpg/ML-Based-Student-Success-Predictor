@@ -5,9 +5,16 @@ function SettingsPage() {
   return (
     <div className="max-w-4xl mx-auto animate-fade-in space-y-6">
       
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">System Settings</h1>
-        <p className="mt-1 text-sm text-gray-500">Configure machine learning parameters, notifications, and application preferences.</p>
+      {/* Header */}
+      <div className="academic-hero-banner rounded-2xl text-white p-6 md:p-7 shadow-xl border border-slate-700/60 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="relative z-10">
+          <span className="text-xs font-bold text-indigo-400 uppercase tracking-wider mb-1 block">Platform Configuration</span>
+          <h1 className="text-2xl font-black text-white tracking-tight flex items-center">
+            <Layout className="h-6 w-6 mr-2.5 text-indigo-400" />
+            System & Model Governance
+          </h1>
+          <p className="text-slate-300 text-xs sm:text-sm mt-0.5">Configure machine learning parameters, risk classification cutoffs, and institutional alert thresholds.</p>
+        </div>
       </div>
 
       <div className="bg-white shadow-sm rounded-lg border border-gray-200">

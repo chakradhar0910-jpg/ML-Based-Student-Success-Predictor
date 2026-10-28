@@ -93,13 +93,16 @@ function StudentDetailsPage() {
     <div className="max-w-7xl mx-auto animate-fade-in space-y-6">
       
       {/* Header */}
-      <div className="flex items-center space-x-4">
-        <Link to="/students" className="p-2 rounded-full hover:bg-gray-100 text-gray-500 transition-colors">
-          <ArrowLeft className="h-5 w-5" />
-        </Link>
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Student Profile</h1>
-          <p className="text-sm text-gray-500">Detailed view and ML predictions</p>
+      <div className="academic-hero-banner rounded-2xl text-white p-6 md:p-7 shadow-xl border border-slate-700/60 flex items-center justify-between">
+        <div className="relative z-10 flex items-center">
+          <Link to="/students" className="mr-4 p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-colors">
+            <ArrowLeft className="h-5 w-5" />
+          </Link>
+          <div>
+            <span className="text-xs font-bold text-indigo-400 uppercase tracking-wider mb-0.5 block">Individual Academic Dossier</span>
+            <h1 className="text-2xl font-black text-white tracking-tight">{student.name} ({student.student_id})</h1>
+            <p className="text-slate-300 text-xs sm:text-sm mt-0.5">Comprehensive performance profile, longitudinal metrics, and ML prediction evaluation</p>
+          </div>
         </div>
       </div>
 

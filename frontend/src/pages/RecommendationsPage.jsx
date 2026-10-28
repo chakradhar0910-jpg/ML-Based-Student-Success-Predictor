@@ -47,12 +47,15 @@ function RecommendationsPage() {
     <div className="max-w-7xl mx-auto animate-fade-in space-y-6">
       
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900 flex items-center">
-          <Target className="h-6 w-6 mr-2 text-indigo-600" />
-          Action Plans & Interventions
-        </h1>
-        <p className="mt-1 text-sm text-gray-500">Aggregated AI recommendations for students flagged as At-Risk.</p>
+      <div className="academic-hero-banner rounded-2xl text-white p-6 md:p-7 shadow-xl border border-slate-700/60 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="relative z-10">
+          <span className="text-xs font-bold text-amber-400 uppercase tracking-wider mb-1 block">Targeted Academic Remediation</span>
+          <h1 className="text-2xl font-black text-white tracking-tight flex items-center">
+            <Target className="h-6 w-6 mr-2.5 text-amber-400" />
+            Intervention Action Plans
+          </h1>
+          <p className="text-slate-300 text-xs sm:text-sm mt-0.5">Automated pedagogical interventions and advisory workflows for students flagged as high or moderate risk.</p>
+        </div>
       </div>
 
       {loading ? (

@@ -66,8 +66,7 @@ function StudentsList() {
     <div className="max-w-7xl mx-auto animate-fade-in space-y-6">
       
       {/* Header */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white p-6 shadow-lg border border-slate-800 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div className="absolute inset-0 opacity-15 bg-[radial-gradient(#818cf8_1px,transparent_1px)] [background-size:16px_16px]"></div>
+      <div className="academic-hero-banner rounded-2xl text-white p-6 md:p-7 shadow-xl border border-slate-700/60 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="relative z-10">
           <span className="text-xs font-bold text-indigo-400 uppercase tracking-wider mb-1 block">Registry Management</span>
           <h1 className="text-2xl font-black text-white tracking-tight">Student Academic Records</h1>

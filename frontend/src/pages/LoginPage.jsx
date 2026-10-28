@@ -107,25 +107,28 @@ function LoginPage() {
   const fillFaculty = () => setForm((p) => ({ ...p, email: 'faculty@ssp.edu', password: 'password123' }))
 
   return (
-    <div className="min-h-screen bg-slate-950 flex items-center justify-center px-4 py-12 relative overflow-hidden">
-      {/* Background ambient lighting and academic lattice pattern */}
-      <div className="absolute inset-0 bg-[radial-gradient(#6366f1_1px,transparent_1px)] [background-size:24px_24px] opacity-20"></div>
-      <div className="absolute -top-32 -left-32 w-96 h-96 bg-indigo-600/25 rounded-full blur-3xl pointer-events-none"></div>
-      <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-blue-600/20 rounded-full blur-3xl pointer-events-none"></div>
+    <div className="min-h-screen auth-campus-bg flex items-center justify-center px-4 py-12 relative overflow-hidden">
+      {/* Subtle ambient lighting and geometric matrix overlay */}
+      <div className="absolute inset-0 bg-[radial-gradient(rgba(255,255,255,0.08)_1px,transparent_1px)] [background-size:24px_24px] pointer-events-none"></div>
+      <div className="absolute -top-32 -left-32 w-96 h-96 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none"></div>
+      <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl pointer-events-none"></div>
       
       <div className="w-full max-w-md relative z-10">
 
         {/* Card */}
-        <div className="bg-white/95 backdrop-blur-2xl rounded-3xl p-8 border border-white/60 shadow-2xl">
+        <div className="bg-white/95 backdrop-blur-xl rounded-3xl p-8 sm:p-9 border border-white/80 shadow-2xl shadow-slate-950/40">
           {/* Header */}
           <div className="text-center mb-8">
             <div className="inline-flex items-center justify-center w-14 h-14
-                            rounded-2xl bg-indigo-600 shadow-xl shadow-indigo-600/30 mb-4 ring-4 ring-indigo-50">
+                            rounded-2xl bg-gradient-to-tr from-indigo-600 to-blue-600 shadow-xl shadow-indigo-600/30 mb-4 ring-4 ring-indigo-50/80">
               <GraduationCap size={28} className="text-white" />
+            </div>
+            <div className="inline-block px-3 py-1 rounded-full bg-indigo-50 border border-indigo-100/80 text-[11px] font-semibold text-indigo-700 uppercase tracking-wider mb-2">
+              Academic Analytics Platform
             </div>
             <h1 className="text-2xl font-black text-slate-900 tracking-tight">Student Success Predictor</h1>
             <p className="text-slate-500 text-sm mt-1">
-              Sign in with your academic credentials
+              Sign in with your institutional credentials
             </p>
           </div>
 

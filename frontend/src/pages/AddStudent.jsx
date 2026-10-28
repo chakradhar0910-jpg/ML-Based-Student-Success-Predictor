@@ -50,15 +50,17 @@ function AddStudent() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto animate-fade-in">
-      <div className="mb-6 flex items-center justify-between">
-        <div className="flex items-center">
-          <Link to="/students" className="mr-4 text-gray-400 hover:text-gray-600">
-            <ArrowLeft className="h-6 w-6" />
+    <div className="max-w-4xl mx-auto animate-fade-in space-y-6">
+      {/* Header */}
+      <div className="academic-hero-banner rounded-2xl text-white p-6 md:p-7 shadow-xl border border-slate-700/60 flex items-center justify-between">
+        <div className="relative z-10 flex items-center">
+          <Link to="/students" className="mr-4 p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-colors">
+            <ArrowLeft className="h-5 w-5" />
           </Link>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Add New Student</h1>
-            <p className="text-sm text-gray-500">Enter student details for prediction</p>
+            <span className="text-xs font-bold text-indigo-400 uppercase tracking-wider mb-0.5 block">Student Registry</span>
+            <h1 className="text-2xl font-black text-white tracking-tight">Enroll New Student</h1>
+            <p className="text-slate-300 text-xs sm:text-sm mt-0.5">Register academic profile and historical performance parameters</p>
           </div>
         </div>
       </div>
