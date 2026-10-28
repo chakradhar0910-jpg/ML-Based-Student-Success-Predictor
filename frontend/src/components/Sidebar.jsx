@@ -16,7 +16,7 @@ import { clearAuthData, getUser } from '../utils/auth.js'
 
 const navItems = [
   { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
-  { name: 'Students', path: '/students', icon: Users },
+  { name: 'Students', path: '/students', icon: Users, end: true },
   { name: 'Add Student', path: '/students/new', icon: UserPlus },
   { name: 'Prediction', path: '/prediction', icon: Activity },
   { name: 'Bulk Prediction', path: '/bulk-prediction', icon: Upload },
@@ -76,6 +76,7 @@ function Sidebar({ isOpen, onClose }) {
                 <li key={item.name}>
                   <NavLink
                     to={item.path}
+                    end={item.end}
                     onClick={() => {
                       if (window.innerWidth < 768) {
                         onClose()
