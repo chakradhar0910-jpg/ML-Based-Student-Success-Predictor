@@ -83,11 +83,41 @@ function BulkPredictionPage() {
     document.body.removeChild(link)
   }
 
+  const handleDownloadSample = () => {
+    const csvContent = [
+      'student_id,name,gender,age,department,semester,attendance,previous_cgpa,mid1,mid2,internal_marks,backlogs',
+      'STU201,Rohan Verma,Male,20,CSE,4,84.5,8.20,41.0,43.5,17.5,0',
+      'STU202,Ananya Sen,Female,19,ECE,3,66.0,5.80,26.5,29.0,12.0,2',
+      'STU203,Karan Malhotra,Male,21,IT,5,92.0,9.10,47.0,48.0,19.0,0',
+      'STU204,Deepa Krishnan,Female,20,CSE,4,74.0,6.90,34.0,36.0,14.5,0',
+      'STU205,Vikram Reddy,Male,22,MECH,6,58.5,4.80,22.0,24.0,10.0,3'
+    ].join('\n')
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.setAttribute('download', 'sample_student_records.csv')
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
+
   return (
     <div className="max-w-7xl mx-auto animate-fade-in space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">Bulk Prediction</h1>
-        <p className="text-sm text-gray-500">Upload a CSV file of student records to generate multiple predictions at once.</p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Bulk Prediction</h1>
+          <p className="text-sm text-gray-500">Upload a CSV file of student records to generate cohort-wide predictions.</p>
+        </div>
+        <button
+          onClick={handleDownloadSample}
+          className="inline-flex items-center px-4 py-2 border border-indigo-200 text-sm font-semibold rounded-lg text-indigo-700 bg-indigo-50 hover:bg-indigo-100 shadow-sm transition-all"
+          id="download-sample-csv-btn"
+        >
+          <Download className="h-4 w-4 mr-2" />
+          Download Sample CSV Template
+        </button>
       </div>
 
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
@@ -121,13 +151,21 @@ function BulkPredictionPage() {
                   <Upload className="h-8 w-8 text-indigo-500" />
                 </div>
                 <h3 className="text-lg font-medium text-gray-900 mb-1">Click or drag a CSV file here</h3>
-                <p className="text-sm text-gray-500 mb-4 max-w-sm">The CSV should contain columns like student_id, attendance, previous_cgpa, etc.</p>
-                <button 
-                  onClick={() => fileInputRef.current.click()}
-                  className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                >
-                  Browse Files
-                </button>
+                <p className="text-sm text-gray-500 mb-4 max-w-sm">Upload student records with attendance, previous CGPA, and assessment marks.</p>
+                <div className="flex flex-wrap items-center justify-center gap-3">
+                  <button 
+                    onClick={() => fileInputRef.current.click()}
+                    className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm"
+                  >
+                    Browse Files
+                  </button>
+                  <button 
+                    onClick={handleDownloadSample}
+                    className="px-4 py-2 border border-transparent rounded-md text-sm font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 transition-colors"
+                  >
+                    Get Sample CSV
+                  </button>
+                </div>
               </div>
             ) : (
               <div className="flex flex-col items-center justify-center">
@@ -204,6 +242,7 @@ function BulkPredictionPage() {
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Department</th>
                     <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Predicted CGPA</th>
+                    <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Confidence (95%)</th>
                     <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Grade</th>
                     <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Risk Level</th>
                   </tr>
@@ -216,6 +255,9 @@ function BulkPredictionPage() {
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{row.department || 'N/A'}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-bold text-indigo-600">
                         {row.Predicted_CGPA !== undefined ? Number(row.Predicted_CGPA).toFixed(2) : '-'}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-center text-xs text-gray-600 font-mono">
+                        {row.Confidence_Interval || '-'}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-center">
                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-gray-100 text-gray-800">
