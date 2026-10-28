@@ -66,17 +66,19 @@ function StudentsList() {
     <div className="max-w-7xl mx-auto animate-fade-in space-y-6">
       
       {/* Header */}
-      <div className="sm:flex sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Students</h1>
-          <p className="mt-1 text-sm text-gray-500">Manage and view all enrolled student records.</p>
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white p-6 shadow-lg border border-slate-800 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="absolute inset-0 opacity-15 bg-[radial-gradient(#818cf8_1px,transparent_1px)] [background-size:16px_16px]"></div>
+        <div className="relative z-10">
+          <span className="text-xs font-bold text-indigo-400 uppercase tracking-wider mb-1 block">Registry Management</span>
+          <h1 className="text-2xl font-black text-white tracking-tight">Student Academic Records</h1>
+          <p className="text-slate-300 text-xs sm:text-sm mt-0.5">Manage and view all enrolled student records, attendance, and examination performance.</p>
         </div>
-        <div className="mt-4 sm:mt-0">
+        <div className="relative z-10">
           <Link
             to="/students/new"
-            className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            className="inline-flex items-center px-4 py-2 border border-indigo-400/30 text-sm font-semibold rounded-xl text-white bg-indigo-600 hover:bg-indigo-500 shadow-md transition-all"
           >
-            <Plus className="-ml-1 mr-2 h-5 w-5" />
+            <Plus className="h-4 w-4 mr-2" />
             Add Student
           </Link>
         </div>

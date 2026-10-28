@@ -107,20 +107,24 @@ function LoginPage() {
   const fillFaculty = () => setForm((p) => ({ ...p, email: 'faculty@ssp.edu', password: 'password123' }))
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-surface-50 via-white to-primary-50
-                    flex items-center justify-center px-4 py-12">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen bg-slate-950 flex items-center justify-center px-4 py-12 relative overflow-hidden">
+      {/* Background ambient lighting and academic lattice pattern */}
+      <div className="absolute inset-0 bg-[radial-gradient(#6366f1_1px,transparent_1px)] [background-size:24px_24px] opacity-20"></div>
+      <div className="absolute -top-32 -left-32 w-96 h-96 bg-indigo-600/25 rounded-full blur-3xl pointer-events-none"></div>
+      <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-blue-600/20 rounded-full blur-3xl pointer-events-none"></div>
+      
+      <div className="w-full max-w-md relative z-10">
 
         {/* Card */}
-        <div className="card shadow-card-lg">
+        <div className="bg-white/95 backdrop-blur-2xl rounded-3xl p-8 border border-white/60 shadow-2xl">
           {/* Header */}
           <div className="text-center mb-8">
             <div className="inline-flex items-center justify-center w-14 h-14
-                            rounded-2xl bg-primary-600 shadow-lg mb-4">
+                            rounded-2xl bg-indigo-600 shadow-xl shadow-indigo-600/30 mb-4 ring-4 ring-indigo-50">
               <GraduationCap size={28} className="text-white" />
             </div>
-            <h1 className="text-2xl font-bold text-surface-900">Student Success Predictor</h1>
-            <p className="text-surface-500 text-sm mt-1">
+            <h1 className="text-2xl font-black text-slate-900 tracking-tight">Student Success Predictor</h1>
+            <p className="text-slate-500 text-sm mt-1">
               Sign in with your academic credentials
             </p>
           </div>
@@ -256,7 +260,7 @@ function LoginPage() {
         </div>
 
         {/* Footer note */}
-        <p className="text-center text-xs text-surface-400 mt-6">
+        <p className="text-center text-xs text-slate-400 mt-6 font-medium">
           ML-Based Student Success Predictor · Academic Analytics Platform
         </p>
       </div>

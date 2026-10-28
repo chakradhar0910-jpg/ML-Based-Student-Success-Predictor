@@ -62,17 +62,19 @@ function PredictionPage() {
     <>
       {/* ── Screen UI ── */}
       <div className="max-w-7xl mx-auto animate-fade-in space-y-6 print:hidden">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Academic Prediction Engine</h1>
-            <p className="text-sm text-gray-500">Run machine learning models to forecast semester CGPA and assess academic risk.</p>
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white p-6 shadow-lg border border-slate-800 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="absolute inset-0 opacity-15 bg-[radial-gradient(#818cf8_1px,transparent_1px)] [background-size:16px_16px]"></div>
+          <div className="relative z-10">
+            <span className="text-xs font-bold text-indigo-400 uppercase tracking-wider mb-1 block">Supervised Regression</span>
+            <h1 className="text-2xl font-black text-white tracking-tight">Academic Prediction Engine</h1>
+            <p className="text-slate-300 text-xs sm:text-sm mt-0.5">Forecast individual semester CGPA and generate tailored intervention recommendations.</p>
           </div>
           {result && (
             <button
               onClick={handlePrint}
-              className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-semibold rounded-lg text-gray-700 bg-white hover:bg-gray-50 shadow-sm transition-all"
+              className="relative z-10 inline-flex items-center px-4 py-2 border border-indigo-400/30 text-sm font-semibold rounded-xl text-white bg-indigo-600 hover:bg-indigo-500 shadow-md transition-all flex-shrink-0"
             >
-              <Printer className="h-4 w-4 mr-2 text-indigo-600" />
+              <Printer className="h-4 w-4 mr-2" />
               Print / Save PDF Report
             </button>
           )}
