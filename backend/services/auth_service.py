@@ -18,7 +18,7 @@ def authenticate_user(email, password):
                     'id': user['id'],
                     'email': user['email'],
                     'role': user['role'],
-                    'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=24)
+                    'exp': datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=24)
                 }, Config.JWT_SECRET_KEY, algorithm='HS256')
                 
                 return {
