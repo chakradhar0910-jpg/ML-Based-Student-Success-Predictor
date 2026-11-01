@@ -22,13 +22,23 @@ def create_app():
     app.register_blueprint(analytics_bp, url_prefix='/api/analytics')
 
     
+    @app.route('/', methods=['GET'])
+    def root():
+        return {
+            'name': 'Student Success Predictor API',
+            'status': 'online',
+            'version': '1.0.0'
+        }
+
     @app.route('/health', methods=['GET'])
     def health_check():
         return {'status': 'healthy'}
         
     return app
 
+app = create_app()
+
 if __name__ == '__main__':
-    app = create_app()
     debug_mode = os.getenv('FLASK_ENV', 'development') == 'development'
-    app.run(host='0.0.0.0', port=5000, debug=debug_mode)
+    port = int(os.getenv('PORT', 5000))
+    app.run(host='0.0.0.0', port=port, debug=debug_mode)
