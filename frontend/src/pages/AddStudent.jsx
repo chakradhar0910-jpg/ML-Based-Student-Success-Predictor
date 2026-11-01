@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Save, Activity } from 'lucide-react'
+import { ArrowLeft, Save, Activity, AlertTriangle, Loader2 } from 'lucide-react'
+import { createStudent } from '../services/studentApi'
 
 function AddStudent() {
   const navigate = useNavigate()
@@ -20,11 +21,13 @@ function AddStudent() {
   })
 
   const [errors, setErrors] = useState({})
+  const [submitting, setSubmitting] = useState(false)
+  const [serverError, setServerError] = useState(null)
 
   const validate = () => {
     const newErrors = {}
-    if (!formData.student_id) newErrors.student_id = 'Student ID is required'
-    if (!formData.name) newErrors.name = 'Name is required'
+    if (!formData.student_id.trim()) newErrors.student_id = 'Student ID is required'
+    if (!formData.name.trim()) newErrors.name = 'Name is required'
     if (formData.attendance === '' || formData.attendance < 0 || formData.attendance > 100) {
       newErrors.attendance = 'Attendance must be between 0 and 100'
     }
@@ -40,12 +43,43 @@ function AddStudent() {
     setFormData({ ...formData, [e.target.name]: e.target.value })
   }
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
+  const handleSubmit = async (e, andPredict = false) => {
+    if (e) e.preventDefault()
+    setServerError(null)
+
     if (validate()) {
-      console.log('Form data to submit:', formData)
-      // Mock API call would go here
-      navigate('/students')
+      setSubmitting(true)
+      try {
+        const payload = {
+          student_id: formData.student_id.trim(),
+          name: formData.name.trim(),
+          gender: formData.gender,
+          age: formData.age ? parseInt(formData.age, 10) : null,
+          department: formData.department,
+          semester: parseInt(formData.semester, 10) || 1,
+          attendance: formData.attendance !== '' ? parseFloat(formData.attendance) : null,
+          previous_cgpa: formData.previous_cgpa !== '' ? parseFloat(formData.previous_cgpa) : null,
+          mid1: formData.mid1 !== '' ? parseFloat(formData.mid1) : null,
+          mid2: formData.mid2 !== '' ? parseFloat(formData.mid2) : null,
+          internal_marks: formData.internal_marks !== '' ? parseFloat(formData.internal_marks) : null,
+          backlogs: parseInt(formData.backlogs, 10) || 0
+        }
+
+        const res = await createStudent(payload)
+        if (res.success) {
+          if (andPredict) {
+            navigate(`/students/${formData.student_id.trim()}`)
+          } else {
+            navigate('/students')
+          }
+        } else {
+          setServerError(res.message || 'Failed to create student.')
+        }
+      } catch (err) {
+        setServerError(err.message || 'Failed to connect to the server.')
+      } finally {
+        setSubmitting(false)
+      }
     }
   }
 
@@ -66,7 +100,13 @@ function AddStudent() {
       </div>
 
       <div className="bg-white shadow-sm rounded-lg border border-gray-200 overflow-hidden">
-        <form onSubmit={handleSubmit} className="p-6 md:p-8">
+        <form onSubmit={(e) => handleSubmit(e, false)} className="p-6 md:p-8">
+          {serverError && (
+            <div className="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 flex items-start gap-3">
+              <AlertTriangle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
+              <p className="text-sm text-red-700 font-medium">{serverError}</p>
+            </div>
+          )}
           <h2 className="text-lg font-medium text-gray-900 mb-4 border-b pb-2">Personal Information</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             <div>
@@ -236,15 +276,27 @@ function AddStudent() {
             </button>
             <button
               type="button"
-              onClick={handleSubmit}
-              className="inline-flex justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              disabled={submitting}
+              onClick={(e) => handleSubmit(e, false)}
+              className="inline-flex justify-center items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              <Save className="-ml-1 mr-2 h-5 w-5" />
-              Save Student
+              {submitting ? (
+                <>
+                  <Loader2 className="animate-spin -ml-1 mr-2 h-4 w-4" />
+                  Saving…
+                </>
+              ) : (
+                <>
+                  <Save className="-ml-1 mr-2 h-5 w-5" />
+                  Save Student
+                </>
+              )}
             </button>
             <button
               type="button"
-              className="inline-flex justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              disabled={submitting}
+              onClick={(e) => handleSubmit(e, true)}
+              className="inline-flex justify-center items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-60 disabled:cursor-not-allowed"
             >
               <Activity className="-ml-1 mr-2 h-5 w-5" />
               Save & Predict
