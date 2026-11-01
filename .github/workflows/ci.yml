@@ -1,0 +1,128 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ─────────────────────────────────────────────────────────────
+  # Job 1: Backend CI (Python, Flask, and ML Artifact Verification)
+  # ─────────────────────────────────────────────────────────────
+  backend-ci:
+    name: Backend CI (Python 3.12)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+          cache-dependency-path: backend/requirements.txt
+
+      - name: Install Backend Dependencies
+        run: |
+          python -m pip install --upgrade pip setuptools wheel
+          pip install -r requirements.txt
+
+      - name: Validate Python Syntax & Bytecode Compilation
+        run: |
+          python -m compileall .
+
+      - name: Verify Flask App Initialization
+        run: |
+          python -c "import sys; sys.path.insert(0, '.'); from app import app; assert app is not None; print('✓ Flask app instance created successfully.')"
+
+      - name: Verify ML Artifacts & Inference Pipeline
+        run: |
+          python -c "
+          import sys
+          sys.path.insert(0, '.')
+          from ml.ml_service import ml_service_instance
+          assert ml_service_instance.model is not None, 'Model failed to load'
+          assert ml_service_instance.preprocessor is not None, 'Preprocessor failed to load'
+          
+          test_sample = {
+              'gender': 'Male',
+              'department': 'CSE',
+              'age': 20,
+              'semester': 4,
+              'attendance': 85.0,
+              'previous_cgpa': 7.8,
+              'mid1': 38.0,
+              'mid2': 40.0,
+              'internal_marks': 16.0,
+              'backlogs': 0
+          }
+          predicted_cgpa, conf = ml_service_instance.predict_cgpa(test_sample, return_confidence=True)
+          perf, grade = ml_service_instance.classify_performance(predicted_cgpa)
+          risk = ml_service_instance.calculate_risk(predicted_cgpa)
+          recs = ml_service_instance.generate_recommendations(test_sample, predicted_cgpa)
+          
+          assert 0.0 <= predicted_cgpa <= 10.0, f'Invalid predicted CGPA: {predicted_cgpa}'
+          assert grade in ['O', 'A', 'B', 'F'], f'Unexpected grade: {grade}'
+          print(f'✓ ML Pipeline test passed: CGPA={predicted_cgpa}, Grade={grade}, Risk={risk}, Recs={len(recs)}')
+          "
+
+  # ─────────────────────────────────────────────────────────────
+  # Job 2: Frontend CI (Node 20, React 19, and Vite Production Build)
+  # ─────────────────────────────────────────────────────────────
+  frontend-ci:
+    name: Frontend CI (Node 20 & Vite)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install Frontend Dependencies
+        run: npm ci
+
+      - name: Build Vite Production Bundle
+        run: npm run build
+
+      - name: Verify Production Assets
+        run: |
+          test -f dist/index.html || (echo "dist/index.html missing!" && exit 1)
+          echo "✓ Vite production bundle built successfully."
+
+  # ─────────────────────────────────────────────────────────────
+  # Job 3: Security & Repository Compliance Audit
+  # ─────────────────────────────────────────────────────────────
+  security-audit:
+    name: Security & Env Template Audit
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Verify Security Policy & Environment Templates
+        run: |
+          test -f SECURITY.md || (echo "SECURITY.md is missing!" && exit 1)
+          test -f backend/.env.example || (echo "backend/.env.example is missing!" && exit 1)
+          test -f frontend/.env.example || (echo "frontend/.env.example is missing!" && exit 1)
+          echo "✓ Security documentation and env templates are present and verified."
