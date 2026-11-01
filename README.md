@@ -3,10 +3,12 @@
 
 [![Python Version](https://img.shields.io/badge/Python-3.11%20%7C%203.12%20%7C%203.14-blue.svg)](https://www.python.org/)
 [![Framework](https://img.shields.io/badge/Backend-Flask%203.x-lightgrey.svg)](https://flask.palletsprojects.com/)
-[![Frontend](https://img.shields.io/badge/Frontend-React%2018%20%7C%20Vite%206-61dafb.svg)](https://react.dev/)
+[![Frontend](https://img.shields.io/badge/Frontend-React%2019%20%7C%20Vite%206-61dafb.svg)](https://react.dev/)
 [![Styling](https://img.shields.io/badge/Styling-Tailwind%20CSS%203-38bdf8.svg)](https://tailwindcss.com/)
 [![Database](https://img.shields.io/badge/Database-MySQL%208.x-orange.svg)](https://www.mysql.com/)
 [![ML Library](https://img.shields.io/badge/ML-Scikit--Learn%20%7C%20XGBoost-F7931E.svg)](https://scikit-learn.org/)
+[![CI/CD](https://img.shields.io/badge/CI%2FCD-GitHub%20Actions-2088FF.svg)](.github/workflows/ci.yml)
+[![Security](https://img.shields.io/badge/Security-Policy%20Enforced-critical.svg)](SECURITY.md)
 [![License](https://img.shields.io/badge/License-Academic%20Project-green.svg)](#)
 
 ---
@@ -40,7 +42,9 @@ This system applies supervised regression machine learning pipelines to forecast
   - [1. Backend Setup](#1-backend-setup)
   - [2. Database Initialization](#2-database-initialization)
   - [3. ML Model Training](#3-ml-model-training)
-  - [4. Frontend Setup](#4-frontend-setup)
+  - [4. Running the Development Servers](#4-running-the-development-servers)
+- [Production Deployment Guide](#-production-deployment-guide)
+- [Security & Automated CI/CD](#-security--automated-cicd)
 - [System Credentials](#-system-credentials)
 - [REST API Reference](#-rest-api-reference)
 - [Project Directory Structure](#-project-directory-structure)
@@ -270,10 +274,19 @@ pip install -r requirements.txt
 ```
 
 #### Backend Environment Variables (`backend/.env`)
-Ensure `backend/.env` exists with your local MySQL credentials:
+Copy the environment template from `backend/.env.example` and set your MySQL credentials:
+```powershell
+# Windows PowerShell
+Copy-Item .env.example .env
+
+# macOS / Linux
+cp .env.example .env
+```
+
 ```env
 FLASK_ENV=development
 DATABASE_HOST=localhost
+DATABASE_PORT=3306
 DATABASE_USER=root
 DATABASE_PASSWORD=your_mysql_password
 DATABASE_NAME=student_success_db
@@ -309,7 +322,7 @@ Generate the synthetic dataset and train the regression models:
 
 ---
 
-### 4. Running the Servers
+### 4. Running the Development Servers
 
 #### Terminal 1 — Start Backend Flask API:
 ```powershell
@@ -321,10 +334,63 @@ cd backend
 #### Terminal 2 — Start Frontend React Application:
 ```powershell
 cd frontend
+
+# Copy frontend env template if not already present
+Copy-Item .env.example .env
+
 npm install
 npm run dev
 ```
 *Frontend will launch at **http://localhost:3000**.*
+
+---
+
+## 🚀 Production Deployment Guide
+
+The application is engineered for turnkey cloud deployment with zero code modifications:
+
+### Backend Deployment (Render / Railway / AWS / Docker)
+1. **WSGI Server**:
+   The backend exposes `app = create_app()` at the top-level module scope in `backend/app.py`.
+   - **Linux / Cloud (Gunicorn)**:
+     ```bash
+     gunicorn --workers 4 --bind 0.0.0.0:$PORT app:app
+     ```
+   - **Windows Server (Waitress)**:
+     ```powershell
+     waitress-serve --port=5000 app:app
+     ```
+2. **Environment Variables**:
+   Configure these in your hosting dashboard:
+   - `FLASK_ENV=production`
+   - `PORT=5000` (or dynamically assigned by host)
+   - `DATABASE_HOST=<your-cloud-mysql-host>`
+   - `DATABASE_PORT=<your-cloud-mysql-port>` (supports custom ports like 14562, 3306)
+   - `DATABASE_USER=<your-db-user>`
+   - `DATABASE_PASSWORD=<your-db-password>`
+   - `DATABASE_NAME=student_success_db`
+   - `JWT_SECRET_KEY=<generate-a-strong-32-byte-secret>`
+
+### Frontend Deployment (Vercel / Netlify / Cloudflare Pages)
+1. **Build Configuration**:
+   - **Framework Preset**: Vite
+   - **Root Directory**: `frontend`
+   - **Build Command**: `npm run build`
+   - **Output Directory**: `dist`
+2. **Environment Variable**:
+   - `VITE_API_BASE_URL=https://<your-backend-domain>/api`
+
+---
+
+## 🔒 Security & Automated CI/CD
+
+- **Security Policy**: Detailed vulnerability reporting procedures and threat mitigations are documented in [`SECURITY.md`](SECURITY.md).
+- **Automated CI/CD**: Every push and pull request to `main` triggers our GitHub Actions pipeline (`.github/workflows/ci.yml`), validating:
+  - Python 3.12 syntax & bytecode compilation.
+  - Flask application factory initialization.
+  - Scikit-learn Random Forest model loading & live inference verification.
+  - Frontend React 19 production bundle compilation (`npm run build`).
+  - Secret scanning to prevent committed `.env` files.
 
 ---
 
@@ -392,10 +458,15 @@ npm run dev
 
 ```
 special-project/
+├── .github/
+│   └── workflows/
+│       └── ci.yml                  # Automated GitHub Actions build, test & lint pipeline
+│
 ├── backend/
-│   ├── app.py                      # Flask application factory & route registration
+│   ├── app.py                      # Flask application factory, WSGI entry & routes
 │   ├── config.py                   # Centralized environment & database configuration
-│   ├── requirements.txt            # Python package dependencies
+│   ├── .env.example                # Template for backend environment variables
+│   ├── requirements.txt            # Python dependencies (Flask, Scikit-learn, Gunicorn)
 │   ├── setup_db.py                 # Automated MySQL database & table initializer
 │   ├── load_students.py            # Batch script loading 50 students into database
 │   ├── database/
@@ -429,8 +500,14 @@ special-project/
 │   │   │   ├── BulkPredictionPage.jsx # Cohort CSV upload with sample template
 │   │   │   ├── StudentsList.jsx    # Complete student database table
 │   │   │   ├── AddStudent.jsx      # Manual student registration form
-│   │   │   └── PredictionHistoryPage.jsx # Audit log of historical predictions
+│   │   │   ├── StudentDetailsPage.jsx # Individual student profile & live ML prediction
+│   │   │   ├── AnalyticsPage.jsx   # In-depth cohort academic analytics & filters
+│   │   │   ├── PredictionHistoryPage.jsx # Audit log of historical predictions
+│   │   │   ├── RecommendationsPage.jsx # Targeted remediation plans for at-risk cohorts
+│   │   │   ├── ProfilePage.jsx     # User administrator profile view
+│   │   │   └── SettingsPage.jsx    # System preferences & configurations
 │   │   └── services/               # Axios API clients
+│   ├── .env.example                # Template for frontend environment variables
 │   ├── tailwind.config.js          # Tailwind CSS design system tokens
 │   └── vite.config.js              # Vite bundler configuration
 │
@@ -443,7 +520,9 @@ special-project/
 │       ├── synthetic_data_generator.py # Synthetic student dataset generator
 │       └── student_data.csv        # 1,000-record training dataset
 │
-├── .gitignore                      # Git exclusion rules
+├── .gitignore                      # Git exclusion rules (.env excluded)
+├── LICENSE                         # Project license
+├── SECURITY.md                     # Security policy & vulnerability reporting guide
 └── README.md                       # Comprehensive project documentation
 ```
 
