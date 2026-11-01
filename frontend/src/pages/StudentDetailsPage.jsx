@@ -36,15 +36,16 @@ function StudentDetailsPage() {
         const features = {
           student_id: studentData.student_id,
           name: studentData.name,
-          department: studentData.department,
-          semester: studentData.semester,
-          attendance: studentData.attendance,
-          previous_cgpa: studentData.previous_cgpa,
-          internal_marks_avg: studentData.internal_marks_avg,
-          assignments_completed: studentData.assignments_completed,
-          backlogs: studentData.backlogs,
-          extracurricular_activities: studentData.extracurricular_activities,
-          study_hours_per_week: studentData.study_hours_per_week
+          gender: studentData.gender || 'Male',
+          age: studentData.age || 20,
+          department: studentData.department || 'CSE',
+          semester: studentData.semester || 4,
+          attendance: studentData.attendance !== undefined ? parseFloat(studentData.attendance) : 75.0,
+          previous_cgpa: studentData.previous_cgpa !== undefined ? parseFloat(studentData.previous_cgpa) : 7.0,
+          mid1: studentData.mid1 !== undefined ? parseFloat(studentData.mid1) : 35.0,
+          mid2: studentData.mid2 !== undefined ? parseFloat(studentData.mid2) : 35.0,
+          internal_marks: studentData.internal_marks !== undefined ? parseFloat(studentData.internal_marks) : 15.0,
+          backlogs: studentData.backlogs !== undefined ? parseInt(studentData.backlogs, 10) : 0
         }
         
         const predictRes = await predictPerformance(features)
