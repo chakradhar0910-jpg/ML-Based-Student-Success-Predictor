@@ -12,7 +12,8 @@ venv.bak/
 
 # Environment Variables
 # Keep repo secure
-# .env
+.env
+*.env.local
 
 # Distribution / packaging
 build/
