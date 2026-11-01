@@ -18,29 +18,33 @@ def predict():
         risk = ml_service_instance.calculate_risk(cgpa)
         recommendations = ml_service_instance.generate_recommendations(data, cgpa)
         
-        # Save to database
-        if 'student_id' in data:
-            connection = get_db_connection()
+        # Save to database if student exists
+        student_id = str(data.get('student_id', '')).strip()
+        if student_id:
             try:
-                with connection.cursor() as cursor:
-                    sql = """
-                    INSERT INTO predictions (student_id, predicted_cgpa, grade, performance_category, risk_level, recommendations, model_name)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s)
-                    """
-                    cursor.execute(sql, (
-                        data['student_id'],
-                        cgpa,
-                        grade,
-                        performance,
-                        risk,
-                        json.dumps(recommendations),
-                        'Random Forest'
-                    ))
-                    connection.commit()
+                connection = get_db_connection()
+                try:
+                    with connection.cursor() as cursor:
+                        cursor.execute("SELECT id FROM students WHERE student_id = %s", (student_id,))
+                        if cursor.fetchone():
+                            sql = """
+                            INSERT INTO predictions (student_id, predicted_cgpa, grade, performance_category, risk_level, recommendations, model_name)
+                            VALUES (%s, %s, %s, %s, %s, %s, %s)
+                            """
+                            cursor.execute(sql, (
+                                student_id,
+                                cgpa,
+                                grade,
+                                performance,
+                                risk,
+                                json.dumps(recommendations),
+                                'Random Forest'
+                            ))
+                            connection.commit()
+                finally:
+                    connection.close()
             except Exception as db_e:
                 print(f"Failed to save prediction to DB: {db_e}")
-            finally:
-                connection.close()
         
         result = {
             'predicted_cgpa': cgpa,
@@ -79,56 +83,70 @@ def predict_bulk():
         if not file.filename.endswith('.csv'):
             return jsonify({'success': False, 'message': 'Only CSV files are supported'}), 400
             
-        # Read CSV
-        stream = io.StringIO(file.stream.read().decode("UTF8"), newline=None)
+        # Read CSV with UTF-8-sig to support BOM exported from Windows Excel
+        stream = io.StringIO(file.stream.read().decode("utf-8-sig"), newline=None)
         df = pd.read_csv(stream)
         
         # We need to process each row
         results = []
-        for index, row in df.iterrows():
-            data_dict = row.to_dict()
-            
-            try:
-                cgpa, confidence_interval = ml_service_instance.predict_cgpa(data_dict, return_confidence=True)
-                performance, grade = ml_service_instance.classify_performance(cgpa)
-                risk = ml_service_instance.calculate_risk(cgpa)
+        db_conn = None
+        try:
+            db_conn = get_db_connection()
+        except Exception as e:
+            print(f"DB connection not available for bulk logging: {e}")
+
+        try:
+            for index, row in df.iterrows():
+                data_dict = row.to_dict()
                 
-                # Append to original data
-                data_dict['Predicted_CGPA'] = cgpa
-                data_dict['Confidence_Interval'] = confidence_interval['range_text']
-                data_dict['Grade'] = grade
-                data_dict['Performance'] = performance
-                data_dict['Risk_Level'] = risk
-                results.append(data_dict)
-                
-                # Save to database
-                if 'student_id' in data_dict:
-                    try:
-                        recommendations = ml_service_instance.generate_recommendations(data_dict, cgpa)
-                        connection = get_db_connection()
-                        with connection.cursor() as cursor:
-                            sql = """
-                            INSERT INTO predictions (student_id, predicted_cgpa, grade, performance_category, risk_level, recommendations, model_name)
-                            VALUES (%s, %s, %s, %s, %s, %s, %s)
-                            """
-                            cursor.execute(sql, (
-                                data_dict['student_id'],
-                                cgpa,
-                                grade,
-                                performance,
-                                risk,
-                                json.dumps(recommendations),
-                                'Random Forest'
-                            ))
-                            connection.commit()
-                        connection.close()
-                    except Exception as db_e:
-                        print(f"Failed to save bulk prediction to DB: {db_e}")
-                        
-            except Exception as row_e:
-                print(f"Error predicting for row {index}: {row_e}")
-                data_dict['Predicted_CGPA'] = "Error"
-                results.append(data_dict)
+                try:
+                    cgpa, confidence_interval = ml_service_instance.predict_cgpa(data_dict, return_confidence=True)
+                    performance, grade = ml_service_instance.classify_performance(cgpa)
+                    risk = ml_service_instance.calculate_risk(cgpa)
+                    
+                    # Append to original data
+                    data_dict['Predicted_CGPA'] = cgpa
+                    data_dict['Confidence_Interval'] = confidence_interval['range_text']
+                    data_dict['Grade'] = grade
+                    data_dict['Performance'] = performance
+                    data_dict['Risk_Level'] = risk
+                    results.append(data_dict)
+                    
+                    # Save to database if student exists
+                    stu_id = str(data_dict.get('student_id', '')).strip()
+                    if db_conn and stu_id:
+                        try:
+                            recommendations = ml_service_instance.generate_recommendations(data_dict, cgpa)
+                            with db_conn.cursor() as cursor:
+                                cursor.execute("SELECT id FROM students WHERE student_id = %s", (stu_id,))
+                                if cursor.fetchone():
+                                    sql = """
+                                    INSERT INTO predictions (student_id, predicted_cgpa, grade, performance_category, risk_level, recommendations, model_name)
+                                    VALUES (%s, %s, %s, %s, %s, %s, %s)
+                                    """
+                                    cursor.execute(sql, (
+                                        stu_id,
+                                        cgpa,
+                                        grade,
+                                        performance,
+                                        risk,
+                                        json.dumps(recommendations),
+                                        'Random Forest'
+                                    ))
+                                    db_conn.commit()
+                        except Exception as db_e:
+                            print(f"Failed to save bulk row {index} to DB: {db_e}")
+                            
+                except Exception as row_e:
+                    print(f"Error predicting for row {index}: {row_e}")
+                    data_dict['Predicted_CGPA'] = "Error"
+                    results.append(data_dict)
+        finally:
+            if db_conn:
+                try:
+                    db_conn.close()
+                except Exception:
+                    pass
                 
         return jsonify({
             'success': True,
