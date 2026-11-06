@@ -253,6 +253,9 @@ CREATE TABLE predictions (
 - **MySQL Server:** 8.0 or higher running locally on port 3306
 
 ---
+### ML-Based Student Success Predictor
+
+clone repo [ML-Based Student Success Predictor](https://github.com/chakradhar0910-jpg/ML-Based-Student-Success-Predictor)
 
 ### 1. Backend Setup
 
